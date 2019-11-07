@@ -1,52 +1,53 @@
 'use strict';
 
-//load Environment veriable from the .env
+// Load Environment veriable from the .env
 require('dotenv').config();
 
-//declare Application Dependencies
+// Declare Application Dependencies
 const express = require('express');
 const cors = require('cors');
+const superagent = require('superagent');
 
-//Application setup
-const PORT = process.env.PORT;
-const app = express(); //convention, just so that it looks better
+// Application setup
+const PORT = process.env.PORT || 3000;
+const app = express();
 app.use(cors());
 
-//API routes
-app.get('/', (request, response) => {
-  response.send(`This is a back-end application that's meant to be used with city explorer front-end`);
+// API routes
+app.get('/', (req, res) => {
+  res.send(`This is a back-end application that's meant to be used with city explorer front-end`);
 });
 
-app.get('/location', (request, response) => {
+app.get('/location', (req, res) => {
   try {
     const geoData = require('./data/geo.json');
-    const city = request.query.data;
+    const city = req.query.data;
     const locationData = new Location(city, geoData);
-    response.send(locationData);
+    res.send(locationData);
   }
   catch(error) {
-    //some function or error message
-    errorHandler('Sorry, something went wrong', request, response);
+    // Some function or error message
+    errorHandler('Sorry, something went wrong', req, res);
   }
 });
 
-app.get('/weather', (request, response) => {
+app.get('/weather', (req, res) => {
   try {
     const weatherData = require('./data/darksky.json');
     const forecastData = getWeather(weatherData);
-    response.send(forecastData);
+    res.send(forecastData);
   }
   catch(error) {
-    errorHandler('Sorry, something went wrong', request, response);
+    errorHandler('Sorry, something went wrong', req, res);
   }
 });
 
-app.get('*', (request, response) => {
-  response.status(404).send('No such page');
+app.get('*', (req, res) => {
+  res.status(404).send('No such page');
 });
 
 
-//Helper functions
+// Helper functions
 function Location(city, geoData) {
   this.search_query = city;
   this.formatted_query = geoData.results[0].formatted_address;
@@ -56,7 +57,7 @@ function Location(city, geoData) {
 
 function Weather(day) {
   this.forecast = day.summary;
-  this.time = timeConverter(day.time);
+  this.time = new Date(day.time * 1000).toString().slice(0,15);
 }
 
 function getWeather(weatherData) {
@@ -66,18 +67,11 @@ function getWeather(weatherData) {
   return result;
 }
 
-function errorHandler (error, request, response) {
-  response.status(500).send(error);
-}
-
-function timeConverter(unixTimeStamp) {
-  let dateObj = new Date(unixTimeStamp * 1000);
-  let utcString = dateObj.toUTCString();
-  let date = utcString.slice(0, 3) + utcString.slice(4, 16);
-  return date;
+function errorHandler (error, req, res) {
+  res.status(500).send(error);
 }
 
 
-//Ensure that the server is listening for requests
-//THIS MUST BE AT THE BOTTOM OF THE FILE
+// Ensure that the server is listening for requests
+// THIS MUST BE AT THE BOTTOM OF THE FILE
 app.listen(PORT, () => console.log(`The server is up listening on ${PORT}`));
