@@ -23,7 +23,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/location', locationHandler);
 app.get('/weather', weatherHandler);
 app.get('*', (req, res) => {
-  res.status(404).send('No such page');
+  res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
 });
 
 
