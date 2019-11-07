@@ -47,10 +47,14 @@ function Weather(day) {
 // Event Handlers
 function locationHandler (req, res) {
   try {
-    const geoData = require('./data/geo.json');
-    const city = req.query.data;
-    const locationData = new Location(city, geoData);
-    res.send(locationData);
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${req.query.data}&key=${process.env.GEOCODE_API_KEY}`;
+    superagent.get(url)
+      .then ( data => {
+        const geoData = data.body;
+        const city = req.query.data;
+        const locationData = new Location(city, geoData);
+        res.send(locationData);
+      });
   }
   catch(error) {
     // Some function or error message
