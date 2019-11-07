@@ -8,7 +8,7 @@
 The goal of this project is to build out the backend to a frontend application called City Explorer. 
 
 ## Getting Started
-Get the frontend of City Explorer [here](https://leokuhorev.github.io/city-explorer/), and point your endpoints to http://cf301-city-explorer.herokuapp.com/.
+Get the frontend of City Explorer [here](https://leokuhorev.github.io/city-explorer/), and point your endpoints to https://cf301-city-explorer.herokuapp.com/
 
 ## Architecture
 This backend has been develeoped using Javascript with the following dependencies, on the node.js framework:
