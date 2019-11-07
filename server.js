@@ -15,19 +15,21 @@ const app = express();
 app.use(cors());
 
 // API routes
+
+// serve static folder
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Specifing the routes
 app.get('/location', locationHandler);
 app.get('/weather', weatherHandler);
-
-
-
 app.get('*', (req, res) => {
   res.status(404).send('No such page');
 });
 
 
 // Helper functions
+
+// location constructor
 function Location(city, geoData) {
   this.search_query = city;
   this.formatted_query = geoData.results[0].formatted_address;
@@ -35,11 +37,14 @@ function Location(city, geoData) {
   this.longitude = geoData.results[0].geometry.location.lng;
 }
 
+// weather constructor
 function Weather(day) {
   this.forecast = day.summary;
   this.time = new Date(day.time * 1000).toString().slice(0,15);
 }
 
+
+// fetching data from the JSON file and instansitad
 function getWeather(weatherData) {
   const result = [];
   weatherData.daily.data.forEach(element =>
