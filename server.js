@@ -17,29 +17,10 @@ app.use(cors());
 // API routes
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/location', (req, res) => {
-  try {
-    const geoData = require('./data/geo.json');
-    const city = req.query.data;
-    const locationData = new Location(city, geoData);
-    res.send(locationData);
-  }
-  catch(error) {
-    // Some function or error message
-    errorHandler('Sorry, something went wrong', req, res);
-  }
-});
+app.get('/location', locationHandler);
+app.get('/weather', weatherHandler);
 
-app.get('/weather', (req, res) => {
-  try {
-    const weatherData = require('./data/darksky.json');
-    const forecastData = getWeather(weatherData);
-    res.send(forecastData);
-  }
-  catch(error) {
-    errorHandler('Sorry, something went wrong', req, res);
-  }
-});
+
 
 app.get('*', (req, res) => {
   res.status(404).send('No such page');
@@ -65,6 +46,33 @@ function getWeather(weatherData) {
     result.push (new Weather (element)));
   return result;
 }
+
+
+// Event Handlers
+function locationHandler (req, res) {
+  try {
+    const geoData = require('./data/geo.json');
+    const city = req.query.data;
+    const locationData = new Location(city, geoData);
+    res.send(locationData);
+  }
+  catch(error) {
+    // Some function or error message
+    errorHandler('Sorry, something went wrong', req, res);
+  }
+}
+
+function weatherHandler(req, res) {
+  try {
+    const weatherData = require('./data/darksky.json');
+    const forecastData = getWeather(weatherData);
+    res.send(forecastData);
+  }
+  catch(error) {
+    errorHandler('Sorry, something went wrong', req, res);
+  }
+}
+
 
 function errorHandler (error, req, res) {
   res.status(500).send(error);
