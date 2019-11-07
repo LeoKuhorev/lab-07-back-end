@@ -7,6 +7,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const superagent = require('superagent');
+const path = require('path');
 
 // Application setup
 const PORT = process.env.PORT || 3000;
@@ -14,9 +15,7 @@ const app = express();
 app.use(cors());
 
 // API routes
-app.get('/', (req, res) => {
-  res.send(`This is a back-end application that's meant to be used with city explorer front-end`);
-});
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/location', (req, res) => {
   try {
