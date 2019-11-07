@@ -44,15 +44,6 @@ function Weather(day) {
 }
 
 
-// fetching data from the JSON file and instansitad
-function getWeather(weatherData) {
-  const result = [];
-  weatherData.daily.data.forEach(element =>
-    result.push (new Weather (element)));
-  return result;
-}
-
-
 // Event Handlers
 function locationHandler (req, res) {
   try {
@@ -70,7 +61,7 @@ function locationHandler (req, res) {
 function weatherHandler(req, res) {
   try {
     const weatherData = require('./data/darksky.json');
-    const forecastData = getWeather(weatherData);
+    const forecastData =   weatherData.daily.data.map(element => new Weather (element));
     res.send(forecastData);
   }
   catch(error) {
