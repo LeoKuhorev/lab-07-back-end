@@ -22,6 +22,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Specifing the routes
 app.get('/location', locationHandler);
 app.get('/weather', weatherHandler);
+app.get('/trails', trailHandler);
 app.get('*', (req, res) => {
   res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
 });
@@ -41,6 +42,20 @@ function Location(city, geoData) {
 function Weather(day) {
   this.forecast = day.summary;
   this.time = new Date(day.time * 1000).toString().slice(0, 15);
+}
+
+//trail constructor
+function Trail(object){
+  this.name = object.name;
+  this.location = object.location;
+  this.length = object.length;
+  this.stars = object.stars;
+  this.star_votes = object.starVotes;
+  this.summary = object.summary;
+  this.trail_url = object.url;
+  this.conditions = object.conditionStatus;
+  this.condition_date = object.conditionDate.slice(0, 10);
+  this.condition_time = object.conditionDate.slice(11);
 }
 
 
@@ -65,7 +80,6 @@ function locationHandler(req, res) {
 function weatherHandler(req, res) {
   try {
     const url = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${req.query.data.latitude},${req.query.data.longitude}`;
-    console.log(req.query.data.latitude);
     superagent.get(url)
       .then(data => {
         const weatherData = data.body;
@@ -77,6 +91,22 @@ function weatherHandler(req, res) {
     errorHandler('Sorry, something went wrong', req, res);
   }
 }
+
+function trailHandler (req, res) {
+  try {
+    const url = `https://www.hikingproject.com/data/get-trails?lat=${req.query.data.latitude}4&lon=${req.query.data.longitude}&key=${process.env.TRAIL_API_KEY}`;
+    superagent.get(url)
+      .then(data => {
+        const trailBody = data.body;
+        const trailData = trailBody.trails.map(element => new Trail(element));
+        res.send(trailData);
+      });
+  }
+  catch (error) {
+    errorHandler('Sorry, something went wrong', req, res);
+  }
+}
+
 
 
 function errorHandler(error, req, res) {
