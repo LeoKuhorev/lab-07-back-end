@@ -15,9 +15,46 @@ const app = express();
 app.use(cors());
 
 // API routes
+
+// serve static folder
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/location', (req, res) => {
+// Specifing the routes
+app.get('/location', locationHandler);
+app.get('/weather', weatherHandler);
+app.get('*', (req, res) => {
+  res.status(404).send('No such page');
+});
+
+
+// Helper functions
+
+// location constructor
+function Location(city, geoData) {
+  this.search_query = city;
+  this.formatted_query = geoData.results[0].formatted_address;
+  this.latitude = geoData.results[0].geometry.location.lat;
+  this.longitude = geoData.results[0].geometry.location.lng;
+}
+
+// weather constructor
+function Weather(day) {
+  this.forecast = day.summary;
+  this.time = new Date(day.time * 1000).toString().slice(0,15);
+}
+
+
+// fetching data from the JSON file and instansitad
+function getWeather(weatherData) {
+  const result = [];
+  weatherData.daily.data.forEach(element =>
+    result.push (new Weather (element)));
+  return result;
+}
+
+
+// Event Handlers
+function locationHandler (req, res) {
   try {
     const geoData = require('./data/geo.json');
     const city = req.query.data;
@@ -28,9 +65,9 @@ app.get('/location', (req, res) => {
     // Some function or error message
     errorHandler('Sorry, something went wrong', req, res);
   }
-});
+}
 
-app.get('/weather', (req, res) => {
+function weatherHandler(req, res) {
   try {
     const weatherData = require('./data/darksky.json');
     const forecastData = getWeather(weatherData);
@@ -39,32 +76,8 @@ app.get('/weather', (req, res) => {
   catch(error) {
     errorHandler('Sorry, something went wrong', req, res);
   }
-});
-
-app.get('*', (req, res) => {
-  res.status(404).send('No such page');
-});
-
-
-// Helper functions
-function Location(city, geoData) {
-  this.search_query = city;
-  this.formatted_query = geoData.results[0].formatted_address;
-  this.latitude = geoData.results[0].geometry.location.lat;
-  this.longitude = geoData.results[0].geometry.location.lng;
 }
 
-function Weather(day) {
-  this.forecast = day.summary;
-  this.time = new Date(day.time * 1000).toString().slice(0,15);
-}
-
-function getWeather(weatherData) {
-  const result = [];
-  weatherData.daily.data.forEach(element =>
-    result.push (new Weather (element)));
-  return result;
-}
 
 function errorHandler (error, req, res) {
   res.status(500).send(error);
