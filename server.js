@@ -14,23 +14,23 @@ const PORT = process.env.PORT || 3000;
 const app = express();
 app.use(cors());
 
-// API routes
 
-// serve static folder
+// API routes
+// Serve static folder
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Specifing the routes
 app.get('/location', locationHandler);
 app.get('/weather', weatherHandler);
 app.get('/trails', trailHandler);
+app.get('/events', eventsHandler);
 app.get('*', (req, res) => {
   res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
 });
 
 
 // Helper functions
-
-// location constructor
+// Location constructor
 function Location(city, geoData) {
   this.search_query = city;
   this.formatted_query = geoData.results[0].formatted_address;
@@ -38,13 +38,21 @@ function Location(city, geoData) {
   this.longitude = geoData.results[0].geometry.location.lng;
 }
 
-// weather constructor
+// Weather constructor
 function Weather(day) {
   this.forecast = day.summary;
   this.time = new Date(day.time * 1000).toString().slice(0, 15);
 }
 
-//trail constructor
+//Event constructor
+function Event(object){
+  this.link = object.url;
+  this.name = object.name.text;
+  this.event_date = object.start.local.slice(0, 10);
+  this.summary = object.summary;
+}
+
+//Trail constructor
 function Trail(object){
   this.name = object.name;
   this.location = object.location;
@@ -83,8 +91,8 @@ function weatherHandler(req, res) {
     superagent.get(url)
       .then(data => {
         const weatherData = data.body;
-        const forecastData = weatherData.daily.data.map(element => new Weather(element));
-        res.send(forecastData);
+        const forecasts= weatherData.daily.data.map(element => new Weather(element));
+        res.send(forecasts);
       });
   }
   catch (error) {
@@ -107,7 +115,20 @@ function trailHandler (req, res) {
   }
 }
 
-
+function eventsHandler(req, res) {
+  try {
+    const url = `https://www.eventbriteapi.com/v3/events/search/?location.longitude=${req.query.data.longitude}&location.latitude=${req.query.data.latitude}&expand=venue&token=${process.env.EVENT_API_KEY}`;
+    superagent.get(url)
+      .then(data => {
+        const eventsData = data.body;
+        const events = eventsData.events.map(element => new Event(element));
+        res.send(events);
+      });
+  }
+  catch (error) {
+    errorHandler('Sorry, something went wrong', req, res);
+  }
+}
 
 function errorHandler(error, req, res) {
   res.status(500).send(error);
