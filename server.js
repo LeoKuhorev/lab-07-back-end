@@ -76,7 +76,7 @@ function locationHandler(req, res) {
         const geoData = data.body;
         const city = req.query.data;
         const locationData = new Location(city, geoData);
-        res.send(locationData);
+        res.status(200).send(locationData);
       });
   }
   catch (error) {
@@ -92,7 +92,7 @@ function weatherHandler(req, res) {
       .then(data => {
         const weatherData = data.body;
         const forecasts= weatherData.daily.data.map(element => new Weather(element));
-        res.send(forecasts);
+        res.status(200).send(forecasts);
       });
   }
   catch (error) {
@@ -107,7 +107,7 @@ function trailHandler (req, res) {
       .then(data => {
         const trailBody = data.body;
         const trailData = trailBody.trails.map(element => new Trail(element));
-        res.send(trailData);
+        res.status(200).send(trailData);
       });
   }
   catch (error) {
@@ -117,12 +117,12 @@ function trailHandler (req, res) {
 
 function eventsHandler(req, res) {
   try {
-    const url = `https://www.eventbriteapi.com/v3/events/search/?location.longitude=${req.query.data.longitude}&location.latitude=${req.query.data.latitude}&expand=venue&token=${process.env.EVENT_API_KEY}`;
+    const url = `https://www.eventbriteapi.com/v3/events/search/?location.longitude=${req.query.data.longitude}&location.latitude=${req.query.data.latitude}&expand=venue&token=${process.env.EVENTBRITE_API_KEY}`;
     superagent.get(url)
       .then(data => {
         const eventsData = data.body;
         const events = eventsData.events.map(element => new Event(element));
-        res.send(events);
+        res.status(200).send(events);
       });
   }
   catch (error) {
